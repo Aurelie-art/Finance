@@ -107,3 +107,55 @@ def get_societe_by_symbole(symbole_boursier):
             return Societe(**ligne)
     finally:
         connexion.close()
+
+def update_societe(id_societe, nom, symbole_boursier, secteur, pays):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            # Verify that the company exists
+            curseur.execute(
+                "SELECT id_societe FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+            if curseur.fetchone() is None:
+                return False
+
+            # Replace the company data
+            curseur.execute(
+                "UPDATE societe "
+                "SET nom = %s, symbole_boursier = %s, secteur = %s, pays = %s "
+                "WHERE id_societe = %s",
+                (nom, symbole_boursier, secteur, pays, id_societe),
+            )
+
+        connexion.commit()
+        return True
+
+    finally:
+        connexion.close()
+
+def delete_societe(id_societe):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            # Vérifier que la société existe
+            curseur.execute(
+                "SELECT id_societe FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+            if curseur.fetchone() is None:
+                return False
+
+            # Supprimer la société
+            curseur.execute(
+                "DELETE FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+        connexion.commit()
+        return True
+
+    finally:
+        connexion.close()
