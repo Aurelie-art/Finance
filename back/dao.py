@@ -1,5 +1,5 @@
-from db import get_connection
-from models import Societe, Bilan, Cours
+from back.db import get_connection
+from back.models import Societe, Bilan, Cours
 
 
 def get_societe_by_id(id_societe):

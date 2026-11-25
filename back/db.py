@@ -1,5 +1,5 @@
 import pymysql
-import config
+import back.config as config
 
 def get_connection():
     return pymysql.connect(
