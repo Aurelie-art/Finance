@@ -17,3 +17,28 @@ def get_societe_by_id(id_societe):
             return Societe(**ligne)
     finally:
         connexion.close()
+
+def get_toutes_les_societes():
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            curseur.execute(
+                "SELECT id_societe, nom, symbole_boursier, secteur, pays "
+                "FROM societe"
+            )
+            return [Societe(**ligne) for ligne in curseur.fetchall()]
+    finally:
+        connexion.close()
+
+def get_societes_by_pays(pays):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            curseur.execute(
+                "SELECT id_societe, nom, symbole_boursier, secteur, pays "
+                "FROM societe WHERE pays = %s",
+                (pays,),
+            )
+            return [Societe(**ligne) for ligne in curseur.fetchall()]
+    finally:
+        connexion.close()
