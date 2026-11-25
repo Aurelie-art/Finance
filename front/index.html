@@ -1,0 +1,130 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MarketView — Dashboard boursier</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">M</div>
+        <div>
+          <strong>MarketView</strong>
+          <span>Financial dashboard</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-heading">
+          <span>PORTFOLIO</span>
+          <span class="section-count" id="societe-count">0</span>
+        </div>
+
+        <ul class="list" id="societes"></ul>
+
+        <button class="add-company-btn" id="btn-add-company">
+          <span>＋</span> Ajouter une société
+        </button>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="status-indicator"></div>
+        <div>
+          <strong>API connectée</strong>
+          <small>Interface de suivi financier</small>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">ESPACE ANALYSE</span>
+          <h1>Vue d'ensemble</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="live-badge"><span class="pulse"></span> Données disponibles</span>
+          <button class="avatar">MV</button>
+        </div>
+      </header>
+
+      <section class="content-area">
+        <section class="welcome-row">
+          <div>
+            <h2>Marché &amp; entreprises</h2>
+            <p>Suivez les cours, analysez les performances et consultez les bilans.</p>
+          </div>
+          <button class="primary-btn" id="open-add-company">
+            <span>＋</span> Nouvelle société
+          </button>
+        </section>
+
+        <section class="card company-card" id="detail">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>Aucune société sélectionnée</h3>
+            <p>Sélectionnez une entreprise dans votre liste pour afficher ses données.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal ajout société -->
+  <div class="modal-overlay hidden" id="company-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <span class="eyebrow">PORTFOLIO</span>
+          <h2>Ajouter une société</h2>
+        </div>
+        <button class="close-btn" id="close-modal" aria-label="Fermer">×</button>
+      </div>
+
+      <form id="form-societe">
+        <label>
+          Nom de la société
+          <input name="nom" placeholder="Ex. Apple Inc." required>
+        </label>
+
+        <label>
+          Symbole boursier
+          <input name="symbole_boursier" placeholder="Ex. AAPL" maxlength="10" required>
+        </label>
+
+        <div class="form-row">
+          <label>
+            Secteur
+            <input name="secteur" placeholder="Technologie">
+          </label>
+          <label>
+            Pays
+            <input name="pays" placeholder="États-Unis">
+          </label>
+        </div>
+
+        <div class="err" id="err-societe"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" id="cancel-modal">Annuler</button>
+          <button type="submit" class="primary-btn">Ajouter la société</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
