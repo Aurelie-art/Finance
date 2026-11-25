@@ -42,3 +42,18 @@ def get_societes_by_pays(pays):
             return [Societe(**ligne) for ligne in curseur.fetchall()]
     finally:
         connexion.close()
+
+def add_societe(nom, symbole_boursier, secteur, pays):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            curseur.execute(
+                "INSERT INTO societe (nom, symbole_boursier, secteur, pays) "
+                "VALUES (%s, %s, %s, %s)",
+                (nom, symbole_boursier, secteur, pays),
+            )
+            nouvel_id = curseur.lastrowid
+        connexion.commit()
+        return nouvel_id
+    finally:
+        connexion.close()
