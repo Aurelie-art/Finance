@@ -1,5 +1,5 @@
-from dao import get_societe_by_symbole, get_latest_bilan, get_cours_by_societe
-from indicateurs import (
+from back.dao import get_societe_by_symbole, get_latest_bilan, get_cours_by_societe
+from back.indicateurs import (
     marge_nette,
     ratio_liquidite,
     ratio_endettement,

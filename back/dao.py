@@ -1,5 +1,5 @@
-from db import get_connection
-from models import Societe, Bilan, Cours
+from back.db import get_connection
+from back.models import Societe, Bilan, Cours
 
 
 def get_societe_by_id(id_societe):
@@ -68,13 +68,28 @@ def get_latest_bilan(id_societe):
                 "actifs_courants, passifs_courants, dettes_totales, "
                 "capitaux_propres, total_actifs "
                 "FROM bilan WHERE id_societe = %s "
-                "ORDER BY annee DESC LIMIT 1",
+                "ORDER BY annee ASC",
                 (id_societe,),
             )
-            ligne = curseur.fetchone()
-            if ligne is None:
-                return None
-            return Bilan(**ligne)
+            lignes = curseur.fetchall()
+            return [Bilan(**ligne) for ligne in lignes]
+    finally:
+        connexion.close()
+
+def get_bilans(id_societe):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            curseur.execute(
+                "SELECT id_societe, annee, chiffre_affaires, resultat_net, "
+                "actifs_courants, passifs_courants, dettes_totales, "
+                "capitaux_propres, total_actifs "
+                "FROM bilan WHERE id_societe = %s "
+                "ORDER BY annee ASC",
+                (id_societe,),
+            )
+            lignes = curseur.fetchall()
+            return [Bilan(**ligne) for ligne in lignes]
     finally:
         connexion.close()
 
@@ -105,5 +120,57 @@ def get_societe_by_symbole(symbole_boursier):
             if ligne is None:
                 return None
             return Societe(**ligne)
+    finally:
+        connexion.close()
+
+def update_societe(id_societe, nom, symbole_boursier, secteur, pays):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            # Verify that the company exists
+            curseur.execute(
+                "SELECT id_societe FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+            if curseur.fetchone() is None:
+                return False
+
+            # Replace the company data
+            curseur.execute(
+                "UPDATE societe "
+                "SET nom = %s, symbole_boursier = %s, secteur = %s, pays = %s "
+                "WHERE id_societe = %s",
+                (nom, symbole_boursier, secteur, pays, id_societe),
+            )
+
+        connexion.commit()
+        return True
+
+    finally:
+        connexion.close()
+
+def delete_societe(id_societe):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            # Vérifier que la société existe
+            curseur.execute(
+                "SELECT id_societe FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+            if curseur.fetchone() is None:
+                return False
+
+            # Supprimer la société
+            curseur.execute(
+                "DELETE FROM societe WHERE id_societe = %s",
+                (id_societe,),
+            )
+
+        connexion.commit()
+        return True
+
     finally:
         connexion.close()

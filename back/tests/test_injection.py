@@ -1,5 +1,5 @@
-from db import get_connection
-from dao import get_societes_by_pays, add_societe
+from back.db import get_connection
+from back.dao import get_societes_by_pays, add_societe
 
 # Test 1: injection in a SELECT filter (prepared statement)
 piege = "France' OR '1'='1"
