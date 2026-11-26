@@ -1,6 +1,8 @@
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Request
 from back.schemas import SocieteCreate, SocieteSchema
+from fastapi.responses import JSONResponse
+from pymysql.err import IntegrityError, MySQLError
 from back.dao import (
     add_societe,
     delete_societe,
@@ -138,4 +140,21 @@ def supprimer_societe(id_societe: int):
             detail="Société introuvable"
         )
 
+#############
+# ERROR
+#############
 
+@app.exception_handler(IntegrityError)
+async def handle_integrity_error(request: Request, exc: IntegrityError):
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Conflit avec les données existantes"}
+    )
+
+
+@app.exception_handler(MySQLError)
+async def handle_database_error(request: Request, exc: MySQLError):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Erreur interne de la base de données"}
+    )
