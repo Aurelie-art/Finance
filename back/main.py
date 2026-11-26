@@ -18,8 +18,16 @@ from back.schemas import SocieteSchema, BilanSchema, CoursSchema
 # Create the application
 app = FastAPI(
     title="Finance API",
-    description="API for managing companies and financial data.",
-    version="1.0.0",
+    description="""
+    API for retrieving and managing financial data about companies.
+
+    Features:
+    - Retrieve companies
+    - Retrieve financial statements
+    - Retrieve stock prices
+    - Create, update and delete companies
+    """,
+    version="1.0.0"
 )
 
 #############
@@ -32,13 +40,25 @@ def home():
     return {"message": "Finance API is running"}
 
 # Retrieve all companies from the database
-@app.get("/societes", response_model=list[SocieteSchema])
+@app.get(
+    "/societes",
+    response_model=list[SocieteSchema],
+    summary="List all companies",
+    description="Returns the list of all companies stored in the database.",
+    tags=["Companies"]
+)
 def get_societes():
     return get_toutes_les_societes()
 
 
 # Retrieve a company by its ID from the database
-@app.get("/societes/{id_societe}", response_model=SocieteSchema)
+@app.get(
+    "/societes/{id_societe}",
+    response_model=SocieteSchema,
+    summary="Retrieve a company by its ID",
+    description="Returns the company with the specified ID if it exists.",
+    tags=["Companies"]
+)
 def get_societe(id_societe: int):
     societe = get_societe_by_id(id_societe)
 
@@ -50,7 +70,13 @@ def get_societe(id_societe: int):
 
     return societe
 
-@app.get("/societes/{id_societe}/bilans", response_model=BilanSchema)
+@app.get(
+    "/societes/{id_societe}/bilans", 
+    response_model=BilanSchema,
+    summary="Retrieve a company's financial statement",
+    description="Returns the latest financial statement available for the requested company.",
+    tags=["Financial Data"]
+)
 def get_bilan_societe(id_societe: int):
     societe = get_societe_by_id(id_societe)
 
@@ -71,7 +97,13 @@ def get_bilan_societe(id_societe: int):
     return bilan
 
 
-@app.get("/societes/{id_societe}/cours", response_model=list[CoursSchema])
+@app.get(
+    "/societes/{id_societe}/cours", 
+    response_model=list[CoursSchema],
+    summary="Retrieve stock prices",
+    description="Returns the historical closing prices and trading volumes for the requested company.",
+    tags=["Financial Data"]
+)
 def get_cours_societe(id_societe: int):
     societe = get_societe_by_id(id_societe)
 
@@ -90,7 +122,10 @@ def get_cours_societe(id_societe: int):
 @app.post(
     "/societes",
     response_model=SocieteSchema,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a company",
+    description="Creates a new company in the database. All fields are required.",
+    tags=["Company Management"]
 )
 def create_societe(societe: SocieteCreate):
     id_societe = add_societe(
@@ -108,7 +143,13 @@ def create_societe(societe: SocieteCreate):
 # PUT
 #############
 
-@app.put("/societes/{id_societe}", response_model=SocieteSchema)
+@app.put(
+    "/societes/{id_societe}", 
+    response_model=SocieteSchema,
+    summary="Update a company",
+    description="Replaces the information of an existing company. All fields are required.",
+    tags=["Company Management"]
+)
 def modifier_societe(id_societe: int, societe: SocieteCreate):
     modification = update_societe(
         id_societe,
@@ -130,7 +171,13 @@ def modifier_societe(id_societe: int, societe: SocieteCreate):
 # DELETE
 #############
 
-@app.delete("/societes/{id_societe}", status_code=204)
+@app.delete(
+    "/societes/{id_societe}", 
+    status_code=204,
+    summary="Delete a company",
+    description="Deletes a company from the database. Deletion may be rejected if financial records are linked to the company.",
+    tags=["Company Management"]
+)
 def supprimer_societe(id_societe: int):
     suppression = delete_societe(id_societe)
 
