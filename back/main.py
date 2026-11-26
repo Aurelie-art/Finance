@@ -3,10 +3,12 @@ from fastapi import FastAPI, HTTPException, status
 from back.schemas import SocieteCreate, SocieteSchema
 from back.dao import (
     add_societe,
+    delete_societe,
     get_toutes_les_societes,
     get_societe_by_id,
     get_latest_bilan,
     get_cours_by_societe,
+    update_societe,
 )
 
 from back.schemas import SocieteSchema, BilanSchema, CoursSchema
@@ -99,4 +101,41 @@ def create_societe(societe: SocieteCreate):
     nouvelle_societe = get_societe_by_id(id_societe)
 
     return nouvelle_societe
+
+#############
+# PUT
+#############
+
+@app.put("/societes/{id_societe}", response_model=SocieteSchema)
+def modifier_societe(id_societe: int, societe: SocieteCreate):
+    modification = update_societe(
+        id_societe,
+        societe.nom,
+        societe.symbole_boursier,
+        societe.secteur,
+        societe.pays
+    )
+
+    if not modification:
+        raise HTTPException(
+            status_code=404,
+            detail="Société introuvable"
+        )
+
+    return get_societe_by_id(id_societe)
+
+#############
+# DELETE
+#############
+
+@app.delete("/societes/{id_societe}", status_code=204)
+def supprimer_societe(id_societe: int):
+    suppression = delete_societe(id_societe)
+
+    if not suppression:
+        raise HTTPException(
+            status_code=404,
+            detail="Société introuvable"
+        )
+
 
