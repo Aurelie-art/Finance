@@ -1,8 +1,6 @@
 
 // ================= CONFIGURATION API =================
-const API_BASE = "http://localhost:8000/api";
-// Si FastAPI sert aussi les fichiers front :
-// const API_BASE = "/api";
+const API_BASE = "http://127.0.0.1:8000";
 // ===================================================
 
 const $ = (selector) => document.querySelector(selector);
@@ -155,8 +153,16 @@ async function renderDetail() {
             </div>
           </div>
         </div>
-        <button class="ghost-btn" id="del">Supprimer la société</button>
+
+        <div class="company-actions">
+          <button class="edit-company-btn" id="edit">
+            ✎ Modifier
+          </button>
+        <button class="ghost-btn" id="del">
+          Supprimer la société
+        </button>
       </div>
+    </div>
 
       <div class="kpi-grid">
         <div class="kpi-card">
@@ -320,29 +326,27 @@ async function renderDetail() {
     });
 
     // Suppression
-    $("#del").onclick = async () => {
-      if (!confirm(`Supprimer ${s.nom} et toutes ses données ?`)) return;
+    $("#edit").onclick = () => openModal("edit", s);
+    // $("#del").onclick = async () => {
+    //   // Préremplir le formulaire avec les informations de la société
+    //   const form = $("#form-societe");
 
-      try {
-        await api(`/societes/${s.id_societe}`, { method: "DELETE" });
-        current = null;
-        chart?.destroy();
-        chart = null;
+    //   form.nom.value = s.nom;
+    //   form.symbole_boursier.value = s.symbole_boursier;
+    //   form.secteur.value = s.secteur || "";
+    //   form.pays.value = s.pays || "";
 
-        detail.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📊</div>
-            <h3>Société supprimée</h3>
-            <p>Sélectionnez une autre société pour continuer.</p>
-          </div>
-        `;
+    //   // Indiquer au formulaire qu'il est en mode modification
+    //   form.dataset.mode = "edit";
+    //   form.dataset.id = s.id_societe;
 
-        const list = await loadSocietes();
-        if (list.length) select(list[0]);
-      } catch (err) {
-        alert(err.message);
-      }
-    };
+    //   // Modifier le titre et le texte du bouton
+    //   $("#modal-title").textContent = "Modifier une société";
+    //   $("#submit-company").textContent = "Enregistrer les modifications";
+
+    //   // Afficher le modal
+    //   $("#company-modal").classList.remove("hidden");
+    // };
 
     bindForm(
       "#form-cours",
@@ -565,17 +569,41 @@ function bindForm(formSel, errSel, path) {
 
 const modal = $("#company-modal");
 
-function openModal() {
+// function openModal() {
+//   modal.classList.remove("hidden");
+//   $("#form-societe").elements.nom.focus();
+// }
+function openModal(mode = "add", s = null) {
+  const form = $("#form-societe");
+  form.reset();
+  $("#err-societe").textContent = "";
+
+  if (mode === "edit" && s) {
+    form.nom.value = s.nom;
+    form.symbole_boursier.value = s.symbole_boursier;
+    form.secteur.value = s.secteur || "";
+    form.pays.value = s.pays || "";
+    form.dataset.mode = "edit";
+    form.dataset.id = s.id_societe;
+    $("#modal-title").textContent = "Modifier une société";
+    $("#submit-company").textContent = "Enregistrer les modifications";
+  } else {
+    form.dataset.mode = "add";
+    delete form.dataset.id;
+    $("#modal-title").textContent = "Ajouter une société";
+    $("#submit-company").textContent = "Ajouter la société";
+  }
+
   modal.classList.remove("hidden");
-  $("#form-societe").elements.nom.focus();
+  form.elements.nom.focus();
 }
 
 function closeModal() {
   modal.classList.add("hidden");
 }
 
-$("#btn-add-company").onclick = openModal;
-$("#open-add-company").onclick = openModal;
+// $("#btn-add-company").onclick = openModal;
+// $("#open-add-company").onclick = openModal;
 $("#close-modal").onclick = closeModal;
 $("#cancel-modal").onclick = closeModal;
 
@@ -595,27 +623,41 @@ $("#form-societe").onsubmit = async (e) => {
   const form = e.target;
   const body = Object.fromEntries(new FormData(form));
 
+  const mode = form.dataset.mode || "add";
+  const id = form.dataset.id;
+
   const submitButton = form.querySelector('button[type="submit"]');
   submitButton.disabled = true;
-  submitButton.textContent = "Ajout...";
+  submitButton.textContent =
+    mode === "edit" ? "Modification..." : "Ajout...";
 
   try {
-    const s = await api("/societes", {
-      method: "POST",
-      body
-    });
+    const s = await api(
+      mode === "edit" ? `/societes/${id}` : "/societes",
+      {
+        method: mode === "edit" ? "PUT" : "POST",
+        body
+      }
+    );
 
     form.reset();
+    form.dataset.mode = "add";
+    delete form.dataset.id;
+
     $("#err-societe").textContent = "";
     closeModal();
 
     tab = "cours";
     await select(s);
+
+    const list = await loadSocietes();
   } catch (err) {
     $("#err-societe").textContent = err.message;
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = "Ajouter la société";
+    submitButton.textContent = form.dataset.mode === "edit"
+      ? "Enregistrer les modifications"
+      : "Ajouter la société";
   }
 };
 
