@@ -68,13 +68,28 @@ def get_latest_bilan(id_societe):
                 "actifs_courants, passifs_courants, dettes_totales, "
                 "capitaux_propres, total_actifs "
                 "FROM bilan WHERE id_societe = %s "
-                "ORDER BY annee DESC LIMIT 1",
+                "ORDER BY annee ASC",
                 (id_societe,),
             )
-            ligne = curseur.fetchone()
-            if ligne is None:
-                return None
-            return Bilan(**ligne)
+            lignes = curseur.fetchall()
+            return [Bilan(**ligne) for ligne in lignes]
+    finally:
+        connexion.close()
+
+def get_bilans(id_societe):
+    connexion = get_connection()
+    try:
+        with connexion.cursor() as curseur:
+            curseur.execute(
+                "SELECT id_societe, annee, chiffre_affaires, resultat_net, "
+                "actifs_courants, passifs_courants, dettes_totales, "
+                "capitaux_propres, total_actifs "
+                "FROM bilan WHERE id_societe = %s "
+                "ORDER BY annee ASC",
+                (id_societe,),
+            )
+            lignes = curseur.fetchall()
+            return [Bilan(**ligne) for ligne in lignes]
     finally:
         connexion.close()
 
