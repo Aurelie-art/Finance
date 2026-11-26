@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
 
 class SocieteSchema(BaseModel):
@@ -41,3 +41,10 @@ class CoursSchema(BaseModel):
     volume: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class SocieteCreate(BaseModel):
+    nom: str = Field(min_length=1, max_length=100)
+    symbole_boursier: str = Field(min_length=1, max_length=20)
+    secteur: str = Field(min_length=1, max_length=100)
+    pays: str = Field(min_length=1, max_length=100)
+

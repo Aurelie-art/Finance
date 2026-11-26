@@ -1,7 +1,8 @@
 
-from fastapi import FastAPI, HTTPException
-from back.schemas import SocieteSchema
+from fastapi import FastAPI, HTTPException, status
+from back.schemas import SocieteCreate, SocieteSchema
 from back.dao import (
+    add_societe,
     get_toutes_les_societes,
     get_societe_by_id,
     get_latest_bilan,
@@ -16,6 +17,10 @@ app = FastAPI(
     description="API for managing companies and financial data.",
     version="1.0.0",
 )
+
+#############
+# GET
+#############
 
 # Declare the roads
 @app.get("/")
@@ -48,7 +53,7 @@ def get_bilan_societe(id_societe: int):
     if societe is None:
         raise HTTPException(
             status_code=404,
-            detail="Société introuvable"
+            detail="Societe not found"
         )
 
     bilan = get_latest_bilan(id_societe)
@@ -56,7 +61,7 @@ def get_bilan_societe(id_societe: int):
     if bilan is None:
         raise HTTPException(
             status_code=404,
-            detail="Bilan introuvable"
+            detail="Bilan not found"
         )
 
     return bilan
@@ -69,7 +74,29 @@ def get_cours_societe(id_societe: int):
     if societe is None:
         raise HTTPException(
             status_code=404,
-            detail="Société introuvable"
+            detail="Cours not found"
         )
 
     return get_cours_by_societe(id_societe)
+
+#############
+# POST
+#############
+
+@app.post(
+    "/societes",
+    response_model=SocieteSchema,
+    status_code=status.HTTP_201_CREATED
+)
+def create_societe(societe: SocieteCreate):
+    id_societe = add_societe(
+        societe.nom,
+        societe.symbole_boursier,
+        societe.secteur,
+        societe.pays
+    )
+
+    nouvelle_societe = get_societe_by_id(id_societe)
+
+    return nouvelle_societe
+
