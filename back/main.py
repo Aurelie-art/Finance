@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, status, Request
 from back.schemas import SocieteCreate, SocieteSchema
 from fastapi.responses import JSONResponse
 from pymysql.err import IntegrityError, MySQLError
+from fastapi.middleware.cors import CORSMiddleware
 from back.dao import (
     add_societe,
     delete_societe,
@@ -11,6 +12,7 @@ from back.dao import (
     get_latest_bilan,
     get_cours_by_societe,
     update_societe,
+    get_bilans,
 )
 
 from back.schemas import SocieteSchema, BilanSchema, CoursSchema
@@ -28,6 +30,17 @@ app = FastAPI(
     - Create, update and delete companies
     """,
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 #############
@@ -71,10 +84,10 @@ def get_societe(id_societe: int):
     return societe
 
 @app.get(
-    "/societes/{id_societe}/bilans", 
-    response_model=BilanSchema,
-    summary="Retrieve a company's financial statement",
-    description="Returns the latest financial statement available for the requested company.",
+    "/societes/{id_societe}/bilans",
+    response_model=list[BilanSchema],
+    summary="Retrieve a company's financial statements",
+    description="Returns all financial statements available for the requested company, ordered chronologically.",
     tags=["Financial Data"]
 )
 def get_bilan_societe(id_societe: int):
@@ -83,18 +96,18 @@ def get_bilan_societe(id_societe: int):
     if societe is None:
         raise HTTPException(
             status_code=404,
-            detail="Societe not found"
+            detail="Company not found"
         )
 
-    bilan = get_latest_bilan(id_societe)
+    bilans = get_bilans(id_societe)
 
-    if bilan is None:
+    if not bilans:
         raise HTTPException(
             status_code=404,
-            detail="Bilan not found"
+            detail="Financial statements not found"
         )
 
-    return bilan
+    return bilans
 
 
 @app.get(
